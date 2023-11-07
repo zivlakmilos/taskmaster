@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	"github.com/zivlakmilos/taskmaster/db"
@@ -62,7 +64,12 @@ func listProjects() {
 		exitWithError(err)
 	}
 
-	fmt.Println(projects)
+	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
+	fmt.Fprintf(w, "id\tname\tstatus\n")
+	for _, project := range projects {
+		fmt.Fprintf(w, "%s\t%s\t%s\n", project.Id, project.Name, project.Status)
+	}
+	w.Flush()
 }
 
 func addProject(name string) {
