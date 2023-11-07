@@ -1,0 +1,39 @@
+db {
+  provider = "sqlite3"
+  url = ":memory:"
+  lib = "sqlx"
+}
+
+enum Status {
+  active = "active"
+  paused = "paused"
+  completed = "completed"
+}
+
+enum TaskStatus {
+  todo = "todo"
+  inProgress = "inProgress"
+  completed = "completed"
+}
+
+model Project {
+  id      string  @id @default(uuid())
+  name    string
+  status  Status
+  tasks   Task[]
+}
+
+model Task {
+  id            string  @id @default(uuid())
+  description   string
+  dateGet       DateTime
+  dateStart     DateTime
+  dateCompleted DateTime
+  priority      int
+  progress      int
+  node          string
+  status        TaskStatus
+
+  project     Project @relation(field: projectId, reference: id)
+  projectId   string
+}

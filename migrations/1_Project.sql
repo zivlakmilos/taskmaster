@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS Project (
+  id TEXT PRIMARY KEY
+  name TEXT
+  status TEXT
+);
+
