@@ -56,8 +56,8 @@ func (s *ProjectStore) Save(project *Project) error {
 	return s.Update(project)
 }
 
-func (s *ProjectStore) Delete(project *Project) error {
-	_, err := s.con.NamedExec("DELETE FROM Project WHERE id=:id", project)
+func (s *ProjectStore) Delete(id string) error {
+	_, err := s.con.Exec("DELETE FROM Project WHERE id=?", id)
 	if err != nil {
 		return err
 	}

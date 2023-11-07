@@ -90,5 +90,17 @@ func addProject(name string) {
 	}
 }
 
-func removeProject(it string) {
+func removeProject(id string) {
+	con, err := openDb()
+	if err != nil {
+		exitWithError(err)
+	}
+	defer con.Close()
+
+	store := db.NewProjectStore(con)
+
+	err = store.Delete(id)
+	if err != nil {
+		exitWithError(err)
+	}
 }
