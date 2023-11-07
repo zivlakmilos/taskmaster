@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -16,6 +17,12 @@ type ProjectStore struct {
 	con *sqlx.DB
 }
 
+func NewProject() *Project {
+	return &Project{
+		Status: StatusActive,
+	}
+}
+
 func NewProjectStore(con *sqlx.DB) *ProjectStore {
 	return &ProjectStore{
 		con: con,
@@ -23,7 +30,8 @@ func NewProjectStore(con *sqlx.DB) *ProjectStore {
 }
 
 func (s *ProjectStore) Insert(project *Project) error {
-	_, err := s.con.Exec("INSERT INTO Project(id, name, status) values(?, ?, ?)", project)
+	project.Id = uuid.New().String()
+	_, err := s.con.NamedExec("INSERT INTO Project(id, name, status) values(:id, :name, :status)", project)
 	if err != nil {
 		return err
 	}
@@ -32,7 +40,7 @@ func (s *ProjectStore) Insert(project *Project) error {
 }
 
 func (s *ProjectStore) Update(project *Project) error {
-	_, err := s.con.Exec("UPDATE Project SET name=?, status=? WHERE id=?", project)
+	_, err := s.con.NamedExec("UPDATE Project SET name=:name, status=:status WHERE id=:id", project)
 	if err != nil {
 		return err
 	}
@@ -49,7 +57,7 @@ func (s *ProjectStore) Save(project *Project) error {
 }
 
 func (s *ProjectStore) Delete(project *Project) error {
-	_, err := s.con.Exec("DELETE FROM Project WHERE id=?", project)
+	_, err := s.con.NamedExec("DELETE FROM Project WHERE id=:id", project)
 	if err != nil {
 		return err
 	}

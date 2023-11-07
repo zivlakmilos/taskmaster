@@ -1,11 +1,13 @@
+.PHONY: build build-migrate
+
 run: build
-	./build/taskmaster
+	@./build/taskmaster
 
 build:
-	go build -o build/taskmaster ./cmd/taskmaster
+	@go build -o build/taskmaster ./cmd/taskmaster
 
 migrate: build-migrate
-	./build/migrate
+	@./build/migrate
 
 build-migrate:
-	go build -o build/migrate ./cmd/migrate
+	@go build -o build/migrate ./cmd/migrate

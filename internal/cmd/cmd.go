@@ -5,7 +5,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cobra"
+	"github.com/zivlakmilos/taskmaster/db"
 )
 
 type Config struct {
@@ -37,6 +39,44 @@ func Execute() {
 	if err != nil {
 		exitWithError(err)
 	}
+}
+
+func openDb() (*sqlx.DB, error) {
+	err := runMigrations()
+	if err != nil {
+		return nil, err
+	}
+
+	dbUrl := path.Join(cfg.configDir, "database.db")
+	return db.Open(dbUrl)
+}
+
+func runMigrations() error {
+	dbUrl := path.Join(cfg.configDir, "database.db")
+
+	if _, err := os.Stat(dbUrl); os.IsExist(err) {
+		return nil
+	}
+
+	if _, err := os.Stat(cfg.configDir); os.IsNotExist(err) {
+		err := os.Mkdir(cfg.configDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	con, err := db.Open(dbUrl)
+	if err != nil {
+		return err
+	}
+	defer con.Close()
+
+	err = db.RunMigrations(con)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func exitWithError(err error) {
