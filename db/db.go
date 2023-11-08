@@ -27,7 +27,7 @@ func RunMigrations(con *sqlx.DB) error {
   dateCompleted TEXT,
   priority INTEGER,
   progress INTEGER,
-  node TEXT,
+  note TEXT,
   status TEXT,
   projectId TEXT
 );`)
