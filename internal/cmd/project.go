@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/zivlakmilos/taskmaster/db"
+	"github.com/zivlakmilos/taskmaster/internal/utils"
 )
 
 var projectCmd = &cobra.Command{
@@ -99,8 +100,15 @@ func removeProject(id string) {
 
 	store := db.NewProjectStore(con)
 
-	err = store.Delete(id)
-	if err != nil {
-		exitWithError(err)
+	if utils.IsValidUUID(id) {
+		err = store.Delete(id)
+		if err != nil {
+			exitWithError(err)
+		}
+	} else {
+		err = store.DeleteByName(id)
+		if err != nil {
+			exitWithError(err)
+		}
 	}
 }

@@ -65,6 +65,15 @@ func (s *ProjectStore) Delete(id string) error {
 	return nil
 }
 
+func (s *ProjectStore) DeleteByName(name string) error {
+	_, err := s.con.Exec("DELETE FROM Project WHERE name=?", name)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *ProjectStore) GetAll() ([]*Project, error) {
 	var res []*Project
 
