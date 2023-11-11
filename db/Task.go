@@ -1,8 +1,6 @@
 package db
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -10,15 +8,15 @@ import (
 type Task struct {
 	Id            string
 	Description   string
-	DateGet       time.Time
-	DateStart     time.Time
-	DateCompleted time.Time
+	DateGet       DateTime `db:"dateGet"`
+	DateStart     DateTime `db:"dateStart"`
+	DateCompleted DateTime `db:"dateCompleted"`
 	Priority      int
 	Progress      int
 	Note          string
 	Status        TaskStatus
 	Project       *Project
-	ProjectId     string
+	ProjectId     string `db:"projectId"`
 }
 
 type TaskStore struct {
@@ -27,7 +25,8 @@ type TaskStore struct {
 
 func NewTask() *Task {
 	return &Task{
-		Status: TaskStatusTodo,
+		Status:   TaskStatusTodo,
+		Priority: 3,
 	}
 }
 
@@ -44,7 +43,7 @@ func (s *TaskStore) Insert(task *Task) error {
       description,
       dateGet,
       dateStart,
-      dateComplete,
+      dateCompleted,
       priority,
       progress,
       note,
@@ -55,7 +54,7 @@ func (s *TaskStore) Insert(task *Task) error {
       :description,
       :dateGet,
       :dateStart,
-      :dateComplete,
+      :dateCompleted,
       :priority,
       :progress,
       :note,
@@ -74,7 +73,7 @@ func (s *TaskStore) Update(task *Task) error {
       description=:description,
       dateGet=:dateGet,
       dateStart=:dateStart,
-      dateComplete=:dateComplete,
+      dateCompleted=:dateCompleted,
       priority=:priority,
       progress=:progress,
       note=:note,
@@ -122,6 +121,28 @@ func (s *TaskStore) Get(id string) (*Task, error) {
 	err := s.con.Get(res, "SELECT * FROM Task WHERE id=?", id)
 	if err != nil {
 		return nil, err
+	}
+
+	return res, nil
+}
+
+func (s *TaskStore) GetAllByProjectId(projectId string) ([]*Task, error) {
+	var res []*Task
+
+	err := s.con.Select(&res, "SELECT * FROM Task WHERE projectId=?", projectId)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (s *TaskStore) GetAllByProjectName(projectName string) ([]*Task, error) {
+	var res []*Task
+
+	err := s.con.Select(&res, "SELECT Task.* FROM Task RIGHT JOIN Project ON Task.projectId=Project.id WHERE Project.name=?", projectName)
+	if err != nil {
+		return res, err
 	}
 
 	return res, nil
