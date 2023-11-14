@@ -20,7 +20,7 @@ func init() {
 }
 
 func showTui() {
-	mainModel := tui.NewMainModel()
+	mainModel := tui.NewMainModel(tui.Config{ConfigDir: cfg.configDir})
 	p := tea.NewProgram(mainModel, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		exitWithError(err)
