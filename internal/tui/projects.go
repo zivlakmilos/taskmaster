@@ -46,6 +46,7 @@ func NewProjectsModel(cfg Config) *ProjectsModel {
 	list := list.New(items, list.NewDefaultDelegate(), 0, 0)
 
 	list.Title = "Projects"
+	list.DisableQuitKeybindings()
 	list.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			key.NewBinding(
@@ -59,6 +60,10 @@ func NewProjectsModel(cfg Config) *ProjectsModel {
 			key.NewBinding(
 				key.WithKeys("d"),
 				key.WithHelp("d", "delete project"),
+			),
+			key.NewBinding(
+				key.WithKeys("q"),
+				key.WithHelp("q", "quit"),
 			),
 		}
 	}
