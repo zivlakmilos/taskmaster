@@ -34,6 +34,8 @@ type ProjectItem struct {
 	description string
 }
 
+type ProjectRemove int
+
 func (i ProjectItem) Title() string       { return i.title }
 func (i ProjectItem) Description() string { return i.description }
 func (i ProjectItem) FilterValue() string { return i.title }
@@ -94,6 +96,9 @@ func (m *ProjectsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		break
 	case ProjectItem:
 		m.list.InsertItem(len(m.list.Items()), msg)
+		break
+	case ProjectRemove:
+		m.list.RemoveItem(int(msg))
 		break
 	}
 
@@ -193,7 +198,7 @@ func (m *ProjectsModel) handleUpdateDelete(msg tea.Msg) tea.Cmd {
 		case "d":
 			item := m.list.SelectedItem().(ProjectItem)
 			m.mode = ProjectsModeNormal
-			return removeProject(m.cfg, item.id)
+			return removeProject(m.cfg, item.id, m.list.Index())
 		case "esc":
 			m.mode = ProjectsModeNormal
 			return nil
@@ -247,7 +252,7 @@ func addProject(cfg Config, name string) tea.Cmd {
 	}
 }
 
-func removeProject(cfg Config, id string) tea.Cmd {
+func removeProject(cfg Config, id string, idx int) tea.Cmd {
 	return func() tea.Msg {
 		con, err := openDb(cfg)
 		if err != nil {
@@ -257,6 +262,6 @@ func removeProject(cfg Config, id string) tea.Cmd {
 		store := db.NewProjectStore(con)
 		store.Delete(id)
 
-		return nil
+		return ProjectRemove(idx)
 	}
 }
