@@ -51,15 +51,19 @@ func NewProjectsModel(cfg Config) *ProjectsModel {
 		return []key.Binding{
 			key.NewBinding(
 				key.WithKeys("a"),
-				key.WithHelp("a", "add project"),
+				key.WithHelp("a", "add"),
 			),
 			key.NewBinding(
 				key.WithKeys("r"),
-				key.WithHelp("r", "rename project"),
+				key.WithHelp("r", "rename"),
 			),
 			key.NewBinding(
 				key.WithKeys("d"),
-				key.WithHelp("d", "delete project"),
+				key.WithHelp("d", "delete"),
+			),
+			key.NewBinding(
+				key.WithKeys("enter"),
+				key.WithHelp("enter", "open"),
 			),
 			key.NewBinding(
 				key.WithKeys("q"),
@@ -87,6 +91,9 @@ func (m *ProjectsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
+		break
+	case ProjectItem:
+		m.list.InsertItem(len(m.list.Items()), msg)
 		break
 	}
 
@@ -144,6 +151,8 @@ func (m *ProjectsModel) handleUpdateNormal(msg tea.Msg) tea.Cmd {
 			break
 		case "d":
 			m.mode = ProjectsModeDelete
+			break
+		case "enter":
 			break
 		case "q":
 			return tea.Quit
@@ -228,7 +237,13 @@ func addProject(cfg Config, name string) tea.Cmd {
 			return err
 		}
 
-		return nil
+		item := ProjectItem{
+			id:          project.Id,
+			title:       project.Name,
+			description: string(project.Status),
+		}
+
+		return item
 	}
 }
 
