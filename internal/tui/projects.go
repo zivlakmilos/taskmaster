@@ -29,6 +29,7 @@ type ProjectsModel struct {
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type ProjectItem struct {
+	id          string
 	title       string
 	description string
 }
@@ -116,6 +117,7 @@ func (m *ProjectsModel) View() string {
 
 	if m.mode == ProjectsModeDelete {
 		res += "\n\n"
+		res += "press d again to delete or esc to abort"
 	}
 
 	return res
@@ -171,6 +173,19 @@ func (m *ProjectsModel) handleUpdateRename(msg tea.Msg) tea.Cmd {
 }
 
 func (m *ProjectsModel) handleUpdateDelete(msg tea.Msg) tea.Cmd {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "d":
+			item := m.list.SelectedItem().(ProjectItem)
+			m.mode = ProjectsModeNormal
+			return removeProject(m.cfg, item.id)
+		case "esc":
+			m.mode = ProjectsModeNormal
+			return nil
+		}
+	}
+
 	return nil
 }
 
@@ -186,7 +201,7 @@ func readProjects(cfg Config) []list.Item {
 	projects, err := store.GetAll()
 
 	for _, project := range projects {
-		projectList = append(projectList, ProjectItem{title: project.Name, description: string(project.Status)})
+		projectList = append(projectList, ProjectItem{id: project.Id, title: project.Name, description: string(project.Status)})
 	}
 
 	return projectList
@@ -207,6 +222,20 @@ func addProject(cfg Config, name string) tea.Cmd {
 		if err != nil {
 			return err
 		}
+
+		return nil
+	}
+}
+
+func removeProject(cfg Config, id string) tea.Cmd {
+	return func() tea.Msg {
+		con, err := openDb(cfg)
+		if err != nil {
+			return err
+		}
+
+		store := db.NewProjectStore(con)
+		store.Delete(id)
 
 		return nil
 	}
